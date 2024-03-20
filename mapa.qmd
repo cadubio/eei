@@ -1,0 +1,63 @@
+---
+title: "Mapa"
+---
+
+```{r}
+#| content: setup
+#| include: false
+#| label: dados
+# prep workspace
+ucs_inss <-
+  readr::read_rds("data/ucs_inss.rds")
+
+br <- readr::read_rds("data/br.rds")
+
+bd_finalpoints_isnn <- readr::read_rds("./data/bd_finalpoints_isnn.rds")
+
+# sd <- SharedData$new(sch)
+
+# sc_muni <- readr::read_rds("~/projetos_R/pablo/doc-pablo/webmap/data/sc_muni.rds")
+
+# projetos_cor <- colorFactor("Set1", domain = sd$projeto)
+
+```
+
+```{r}
+#| label: mapa
+#| warning: false
+#| echo: false
+
+leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addPolygons(data = br) |>
+  leaflet::setView(-50.273438,-15.623037, zoom = 4) |>
+  leaflet::addPolygons(
+    data = ucs_inss,
+    color = "green",
+    stroke = 1,
+    label = ~gsub("_", " ", Nome),
+    popup = ~ paste0(
+      "<b>", gsub("_", " ", Nome), "</b>", "</br>",
+      "CNUC: ", Name, "<br/>",
+      "Jurisdição: ", JUR, "<br/>",
+      "Estado: ", ES, "<br/>",
+      "Tipo: ", gsub("_", " ", GR), "<br/>",
+      "Criação: ", ANO_CRIACA, "<br/>",
+      "Publicação: ", ANO_PUBLIC
+    )
+  ) |>
+  leaflet::addCircleMarkers(
+    stroke = TRUE, radius = 10,
+    data = bd_finalpoints_isnn,
+    clusterOptions = leaflet::markerClusterOptions(),
+    label = ~gsub("_", " ", ESPECIES_T),
+    popup = ~ paste0(
+      "<b>", gsub("_", " ", ESPECIES_T), "</b>", "<br/>", 
+      "Grupo: ", GRUPO, "<br/>",
+      "Classificação: ", CLASSIFICA, "<br/>",
+      "Ambiente: ", AMBIENTE, "<br/>",
+      "Bioma: ", BIOMA, "<br/>",
+      "Citação: ", FONTE
+    )
+  )
+```
